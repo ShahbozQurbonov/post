@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePostRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
     public function index()
     {
-        $posts=Post::all();
+        $posts=Post::latest()->paginate(10);
 
         return view('posts.index')->with('posts',$posts);
      }
@@ -49,13 +50,31 @@ class PostController extends Controller
         return view('posts.edit')->with(['post'=>$post]);
     }
 
-    public function update(Request $request, Post $post)
+    public function update(StorePostRequest $request, Post $post)
     {
-        //
+        if(isset($post->photo)){
+            Storage::delete($post->photo);
+        }
+        if($request->hasFile('photo')){
+            $name=$request->file('photo')->getClientOriginalName();
+            $path=$request->file('photo')->storeAs('post-photos',$name);
+        }
+
+        $post->update([
+            'title'=>$request->title,
+            'short_content'=>$request->short_content,
+            'content'=>$request->content,
+            'photo'=>$path ?? $post->photo,
+        ]);
+        return redirect()->route('posts.show',['post'=>$post->id]);
     }
 
-    public function destroy(string $id)
+    public function destroy(Post $post)
     {
-        //
+        if(isset($post->photo)){
+            Storage::delete($post->photo);
+        }
+        $post->delete();
+        return redirect()->route('posts.index');
     }
 }
