@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,5 +28,6 @@ Route::get('contact',[PageController::class,'contact'])->name('contact');
 Route::resources([
     'posts' => PostController::class,
     'comments' => CommentController::class,
+    'users'=> UserController::class,
 ]);
 
